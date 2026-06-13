@@ -110,7 +110,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  -- vim.o.relativenumber = true
+  vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -122,12 +122,14 @@ do
   --  Schedule the setting after `UiEnter` because it can increase startup-time.
   --  Remove this option if you want your OS clipboard to remain independent.
   --  See `:help 'clipboard'`
-  vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
+  -- vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
 
   -- Enable break indent
   vim.o.breakindent = true
-
-  -- Enable undo/redo changes even after closing and reopening a file
+  vim.o.shiftwidth = 4     -- Size of an indent
+  vim.o.tabstop = 4        -- Number of spaces tabs count for
+  vim.o.softtabstop = 4    -- Number of spaces tabs count for in editing mode
+  vim.o.expandtab = true   -- Use spaces instead of tabs  -- Enable undo/redo changes even after closing and reopening a file
   vim.o.undofile = true
 
   -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
@@ -136,9 +138,10 @@ do
 
   -- Keep signcolumn on by default
   vim.o.signcolumn = 'yes'
+  vim.o.colorcolumn = "80"
 
   -- Decrease update time
-  vim.o.updatetime = 250
+  vim.o.updatetime = 50
 
   -- Decrease mapped sequence wait time
   vim.o.timeoutlen = 300
@@ -644,7 +647,7 @@ do
 
       -- The following two autocommands are used to highlight references of the
       -- word under your cursor when your cursor rests there for a little while.
-      --    See `:help CursorHold` for information about when this is executed
+     --    See `:help CursorHold` for information about when this is executed
       --
       -- When you move your cursor, the highlights will be cleared (the second autocommand).
       local client = vim.lsp.get_client_by_id(event.data.client_id)
@@ -739,6 +742,7 @@ do
     gh 'mason-org/mason.nvim',
     gh 'mason-org/mason-lspconfig.nvim',
     gh 'WhoIsSethDaniel/mason-tool-installer.nvim',
+    gh 'mfussenegger/nvim-jdtls', -- Java: jdtls is launched by ftplugin/java.lua, not via lspconfig
   }
 
   -- Automatically install LSPs and related tools to stdpath for Neovim
@@ -754,6 +758,9 @@ do
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
+    'jdtls', -- Java language server (started by ftplugin/java.lua)
+    'java-debug-adapter', -- DAP server for Java
+    'java-test', -- JUnit test runner bundles for jdtls
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -795,7 +802,13 @@ do
       -- python = { "isort", "black" },
       --
       -- You can use 'stop_after_first' to run the first available formatter from the list
-      -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      javascript = { "prettierd", "prettier", stop_after_first = true },
+      java = { "google-java-format" },
+    },
+    formatter = {
+      ["google-java-format"] = {
+        prepend_args = { "--aosp" },
+      },
     },
   }
 
@@ -960,17 +973,17 @@ do
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug'
-  -- require 'kickstart.plugins.indent_line'
-  -- require 'kickstart.plugins.lint'
-  -- require 'kickstart.plugins.autopairs'
-  -- require 'kickstart.plugins.neo-tree'
-  -- require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
+  require 'kickstart.plugins.debug'
+  require 'kickstart.plugins.indent_line'
+  require 'kickstart.plugins.lint'
+  require 'kickstart.plugins.autopairs'
+  require 'kickstart.plugins.neo-tree'
+  require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- require 'custom.plugins'
+  require 'custom.plugins'
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
