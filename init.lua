@@ -126,10 +126,10 @@ do
 
   -- Enable break indent
   vim.o.breakindent = true
-  vim.o.shiftwidth = 4     -- Size of an indent
-  vim.o.tabstop = 4        -- Number of spaces tabs count for
-  vim.o.softtabstop = 4    -- Number of spaces tabs count for in editing mode
-  vim.o.expandtab = true   -- Use spaces instead of tabs  -- Enable undo/redo changes even after closing and reopening a file
+  vim.o.shiftwidth = 4 -- Size of an indent
+  vim.o.tabstop = 4 -- Number of spaces tabs count for
+  vim.o.softtabstop = 4 -- Number of spaces tabs count for in editing mode
+  vim.o.expandtab = true -- Use spaces instead of tabs  -- Enable undo/redo changes even after closing and reopening a file
   vim.o.undofile = true
 
   -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
@@ -138,7 +138,7 @@ do
 
   -- Keep signcolumn on by default
   vim.o.signcolumn = 'yes'
-  vim.o.colorcolumn = "80"
+  vim.o.colorcolumn = '80'
 
   -- Decrease update time
   vim.o.updatetime = 50
@@ -274,7 +274,7 @@ do
   --  of how to install and configure plugins using `vim.pack`.
   --
   --  In this section we set up some autocommands to run build
-  --  steps for certain plugins after they are installed or updated.
+  -- steps for certain plugins after they are installed or updated.
 
   local function run_build(name, cmd, cwd)
     local result = vim.system(cmd, { cwd = cwd }):wait()
@@ -647,7 +647,7 @@ do
 
       -- The following two autocommands are used to highlight references of the
       -- word under your cursor when your cursor rests there for a little while.
-     --    See `:help CursorHold` for information about when this is executed
+      --    See `:help CursorHold` for information about when this is executed
       --
       -- When you move your cursor, the highlights will be cleared (the second autocommand).
       local client = vim.lsp.get_client_by_id(event.data.client_id)
@@ -783,8 +783,13 @@ do
     format_on_save = function(bufnr)
       -- You can specify filetypes to autoformat on save here:
       local enabled_filetypes = {
-        -- lua = true,
-        -- python = true,
+        lua = true,
+        python = true,
+        json = true,
+        html = true,
+        css = true,
+        javascript = true,
+        java = true,
       }
       if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }
@@ -799,15 +804,23 @@ do
     formatters_by_ft = {
       -- rust = { 'rustfmt' },
       -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
+      python = { 'ruff' },
       --
       -- You can use 'stop_after_first' to run the first available formatter from the list
-      javascript = { "prettierd", "prettier", stop_after_first = true },
-      java = { "google-java-format" },
+      javascript = { 'prettierd', 'prettier', stop_after_first = true },
+      typescript = { 'prettier' },
+      javascriptreact = { 'prettier' },
+      typescriptreact = { 'prettier' },
+      svelte = { 'prettier' },
+      css = { 'prettier' },
+      html = { 'prettier' },
+      json = { 'prettier' },
+      yaml = { 'prettier' },
+      java = { 'google-java-format' },
     },
     formatter = {
-      ["google-java-format"] = {
-        prepend_args = { "--aosp" },
+      ['google-java-format'] = {
+        prepend_args = { '--aosp' },
       },
     },
   }

@@ -5,6 +5,7 @@ vim.pack.add { 'https://github.com/mfussenegger/nvim-lint' }
 local lint = require 'lint'
 lint.linters_by_ft = {
   markdown = { 'markdownlint' }, -- Make sure to install `markdownlint` via mason / npm
+  python = { 'ruff' },
 }
 
 -- To allow other plugins to add linters to require('lint').linters_by_ft,
@@ -33,7 +34,7 @@ lint.linters_by_ft = {
 -- lint.linters_by_ft['inko'] = nil
 -- lint.linters_by_ft['janet'] = nil
 -- lint.linters_by_ft['json'] = nil
--- lint.linters_by_ft['markdown'] = nil
+lint.linters_by_ft['markdown'] = nil
 -- lint.linters_by_ft['rst'] = nil
 -- lint.linters_by_ft['ruby'] = nil
 -- lint.linters_by_ft['terraform'] = nil
