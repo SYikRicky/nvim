@@ -816,6 +816,7 @@ do
       html = { 'prettier' },
       json = { 'prettier' },
       yaml = { 'prettier' },
+      markdown = { 'prettier' },
       java = { 'google-java-format' },
     },
     formatter = {
