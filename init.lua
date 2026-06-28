@@ -698,7 +698,9 @@ do
     --    https://github.com/pmizio/typescript-tools.nvim
     --
     -- But for many setups, the LSP (`ts_ls`) will work just fine
-    -- ts_ls = {},
+    ts_ls = {},
+
+    eslint = {},
 
     stylua = {}, -- Used to format Lua code
 
@@ -746,7 +748,9 @@ do
   }
 
   -- Automatically install LSPs and related tools to stdpath for Neovim
-  require('mason').setup {}
+  require('mason').setup {
+    ensure_installed = { 'ts_ls', 'ruff', 'eslint', 'css-lsp', 'html-lsp', 'hadolint', 'jsonlint' },
+  }
 
   -- Ensure the servers and tools above are installed
   --
