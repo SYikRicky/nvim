@@ -354,16 +354,11 @@ do
   --
   -- See `:help gitsigns` to understand what each configuration key does.
   -- Adds git related signs to the gutter, as well as utilities for managing changes
+  -- NOTE: gitsigns is set up exactly once, in `kickstart.plugins.gitsigns`
+  -- (required at the end of this file), which configures both the signs and the
+  -- recommended keymaps. Calling `setup` here as well would just be overridden
+  -- by that later call, so we only install the plugin in this section.
   vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
-  require('gitsigns').setup {
-    signs = {
-      add = { text = '+' }, ---@diagnostic disable-line: missing-fields
-      change = { text = '~' }, ---@diagnostic disable-line: missing-fields
-      delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
-      topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
-      changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
-    },
-  }
 
   -- Useful plugin to show you pending keybinds.
   vim.pack.add { gh 'folke/which-key.nvim' }
@@ -749,9 +744,10 @@ do
   }
 
   -- Automatically install LSPs and related tools to stdpath for Neovim
-  require('mason').setup {
-    ensure_installed = { 'ts_ls', 'ruff', 'stylelint', 'html-lsp', 'hadolint', 'jsonlint', 'htmlhint' },
-  }
+  -- NOTE: `mason.setup()` does not accept an `ensure_installed` key (that option
+  -- silently does nothing here); tool installation is driven by
+  -- `mason-tool-installer` below, so the linters live in that list instead.
+  require('mason').setup {}
 
   -- Ensure the servers and tools above are installed
   --
@@ -766,6 +762,14 @@ do
     'jdtls', -- Java language server (started by ftplugin/java.lua)
     'java-debug-adapter', -- DAP server for Java
     'java-test', -- JUnit test runner bundles for jdtls
+    -- Linters used by kickstart.plugins.lint (nvim-lint). These were previously
+    -- (ineffectively) listed under mason.setup's ignored `ensure_installed`.
+    'ruff', -- python (also used as a formatter by conform)
+    'stylelint', -- css
+    'htmlhint', -- html
+    'jsonlint', -- json
+    'hadolint', -- dockerfile
+    'html-lsp', -- HTML language server (install only; enable it by adding `html = {}` to `servers`)
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }

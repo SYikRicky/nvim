@@ -5,6 +5,16 @@
 vim.pack.add { 'https://github.com/lewis6991/gitsigns.nvim' }
 
 require('gitsigns').setup {
+  -- NOTE: Consolidated single setup. The custom signs previously lived in a
+  -- second `gitsigns.setup` call in init.lua, which this one overrode (each
+  -- setup() restarts from defaults), so the signs are kept here instead.
+  signs = {
+    add = { text = '+' }, ---@diagnostic disable-line: missing-fields
+    change = { text = '~' }, ---@diagnostic disable-line: missing-fields
+    delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
+    topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
+    changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
+  },
   on_attach = function(bufnr)
     local gitsigns = require 'gitsigns'
 
