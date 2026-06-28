@@ -7,8 +7,8 @@ lint.linters_by_ft = {
   markdown = { 'markdownlint' }, -- Make sure to install `markdownlint` via mason / npm
   python = { 'ruff' },
   dockerfile = { 'hadolint' },
-  css = { 'css-lsp' },
-  html = { 'html-lsp' },
+  css = { 'stylelint' },
+  html = { 'htmlhint' },
   json = { 'jsonlint' },
 }
 

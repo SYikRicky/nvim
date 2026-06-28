@@ -701,8 +701,9 @@ do
     ts_ls = {},
 
     eslint = {},
+    tailwindcss = {},
 
-    stylua = {}, -- Used to format Lua code
+    stylua = {},
 
     -- Special Lua Config, as recommended by neovim help docs
     lua_ls = {
@@ -749,7 +750,7 @@ do
 
   -- Automatically install LSPs and related tools to stdpath for Neovim
   require('mason').setup {
-    ensure_installed = { 'ts_ls', 'ruff', 'eslint', 'css-lsp', 'html-lsp', 'hadolint', 'jsonlint' },
+    ensure_installed = { 'ts_ls', 'ruff', 'stylelint', 'html-lsp', 'hadolint', 'jsonlint', 'htmlhint' },
   }
 
   -- Ensure the servers and tools above are installed
@@ -929,7 +930,7 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'css' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
