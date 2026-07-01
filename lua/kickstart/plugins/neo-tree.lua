@@ -5,11 +5,12 @@ local plugins = {
   { src = 'https://github.com/nvim-neo-tree/neo-tree.nvim', version = vim.version.range '*' },
   'https://github.com/nvim-lua/plenary.nvim',
   'https://github.com/MunifTanjim/nui.nvim',
+  'https://github.com/nvim-tree/nvim-web-devicons',
 }
 
-if vim.g.have_nerd_font then
-  table.insert(plugins, 'https://github.com/nvim-tree/nvim-web-devicons') -- not strictly required, but recommended
-end
+-- if vim.g.have_nerd_font then
+--   table.insert(plugins, 'https://github.com/nvim-tree/nvim-web-devicons') -- not strictly required, but recommended
+-- end
 
 vim.pack.add(plugins)
 
