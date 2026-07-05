@@ -84,6 +84,15 @@ jdtls.start_or_attach {
       -- responsiveness win). Diagnostics no longer refresh live; rebuild on demand with
       -- <leader>Jb (or :JdtCompile) to update cross-file errors.
       autobuild = { enabled = false },
+      -- Custom Eclipse formatter profile: 4-space indent AND 4-space continuation for
+      -- wrapped lines (jdtls' default doubles continuation to 8). Profile file lives at
+      -- <config>/eclipse-java-formatter.xml.
+      format = {
+        settings = {
+          url = vim.fn.stdpath 'config' .. '/eclipse-java-formatter.xml',
+          profile = 'nvim-4space',
+        },
+      },
       signatureHelp = { enabled = true },
       contentProvider = { preferred = 'fernflower' },
       completion = {

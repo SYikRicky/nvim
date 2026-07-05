@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<profiles version="21">
+  <profile kind="CodeFormatterProfile" name="nvim-4space" version="21">
+    <!-- 4-space indentation, spaces not tabs -->
+    <setting id="org.eclipse.jdt.core.formatter.tabulation.char" value="space"/>
+    <setting id="org.eclipse.jdt.core.formatter.tabulation.size" value="4"/>
+    <setting id="org.eclipse.jdt.core.formatter.indentation.size" value="4"/>
+    <!-- wrapped/continuation lines get 1x indent (4 spaces), not the default 2x (8) -->
+    <setting id="org.eclipse.jdt.core.formatter.continuation_indentation" value="1"/>
+    <setting id="org.eclipse.jdt.core.formatter.continuation_indentation_for_array_initializer" value="1"/>
+    <!-- one record component per line (M_ONE_PER_LINE_SPLIT = 48) -->
+    <setting id="org.eclipse.jdt.core.formatter.alignment_for_record_components" value="48"/>
+    <!-- each annotation on its own line: type on its own line after the annotations,
+         and each annotation forced onto its own line (M_ONE_PER_LINE_SPLIT | M_FORCE = 49) -->
+    <setting id="org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_parameter" value="insert"/>
+    <setting id="org.eclipse.jdt.core.formatter.alignment_for_annotations_on_parameter" value="49"/>
+  </profile>
+</profiles>
