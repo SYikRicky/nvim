@@ -1,5 +1,5 @@
 -- Launches eclipse.jdt.ls (jdtls) for Java buffers via nvim-jdtls.
--- Mason must have installed: jdtls, java-debug-adapter, java-test
+-- Mason must have installed: jdtls, java-debug-adapter, java-test, vscode-spring-boot-tools
 -- (see ensure_installed in init.lua). On first open run :Mason if anything is missing.
 
 local ok, jdtls = pcall(require, 'jdtls')
@@ -8,7 +8,7 @@ if not ok then return end
 local mr_ok, mason_registry = pcall(require, 'mason-registry')
 if not mr_ok then return end
 
-local mason_pkg_root = vim.fn.stdpath('data') .. '/mason/packages'
+local mason_pkg_root = vim.fn.stdpath 'data' .. '/mason/packages'
 local function pkg_path(name)
   if not mason_registry.is_installed(name) then
     vim.notify(('Mason package %q not installed yet — run :Mason'):format(name), vim.log.levels.WARN)
@@ -39,21 +39,32 @@ if jdb then vim.list_extend(bundles, vim.fn.glob(jdb .. '/extension/server/com.m
 local jtest = pkg_path 'java-test'
 if jtest then vim.list_extend(bundles, vim.fn.glob(jtest .. '/extension/server/*.jar', false, true)) end
 
+-- Spring Boot: jdtls extension bundles from the vscode-spring-boot-tools Mason package.
+-- They let jdtls resolve Spring beans/endpoints/classpath for the Spring Boot language
+-- server (started in init.lua). java_extensions() returns {} if the package is missing.
+local sb_ok, spring_boot = pcall(require, 'spring_boot')
+if sb_ok then vim.list_extend(bundles, spring_boot.java_extensions()) end
+
 jdtls.start_or_attach {
   cmd = {
     'java',
     '-Declipse.application=org.eclipse.jdt.ls.core.id1',
     '-Dosgi.bundles.defaultStartLevel=4',
     '-Declipse.product=org.eclipse.jdt.ls.core.product',
-    '-Dlog.protocol=true',
-    '-Dlog.level=ALL',
+    '-Dlog.protocol=false', -- was 'true'; logging full LSP JSON traffic per keystroke is costly
+    '-Dlog.level=WARNING', -- was ALL; ALL floods .metadata/.log and drags responsiveness
     '-Xmx1g',
     '--add-modules=ALL-SYSTEM',
-    '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-    '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-    '-jar', launcher,
-    '-configuration', jdtls_path .. '/' .. config_subdir,
-    '-data', workspace_dir,
+    '--add-opens',
+    'java.base/java.util=ALL-UNNAMED',
+    '--add-opens',
+    'java.base/java.lang=ALL-UNNAMED',
+    '-jar',
+    launcher,
+    '-configuration',
+    jdtls_path .. '/' .. config_subdir,
+    '-data',
+    workspace_dir,
   },
   root_dir = root_dir,
   settings = {

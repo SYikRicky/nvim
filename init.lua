@@ -741,6 +741,7 @@ do
     gh 'mason-org/mason-lspconfig.nvim',
     gh 'WhoIsSethDaniel/mason-tool-installer.nvim',
     gh 'mfussenegger/nvim-jdtls', -- Java: jdtls is launched by ftplugin/java.lua, not via lspconfig
+    gh 'JavaHello/spring-boot.nvim', -- Spring Boot LS + jdtls bundles (wired up in ftplugin/java.lua)
   }
 
   -- Automatically install LSPs and related tools to stdpath for Neovim
@@ -762,6 +763,7 @@ do
     'jdtls', -- Java language server (started by ftplugin/java.lua)
     'java-debug-adapter', -- DAP server for Java
     'java-test', -- JUnit test runner bundles for jdtls
+    'vscode-spring-boot-tools', -- Spring Boot LS + jdtls extension bundles (see ftplugin/java.lua)
     -- Linters used by kickstart.plugins.lint (nvim-lint). These were previously
     -- (ineffectively) listed under mason.setup's ignored `ensure_installed`.
     'ruff', -- python (also used as a formatter by conform)
@@ -773,6 +775,16 @@ do
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+
+  -- Spring Boot support: a separate Spring Boot language server that auto-attaches to
+  -- Java, application.yml and application.properties buffers. Its jdtls extension
+  -- bundles are wired into jdtls in ftplugin/java.lua. Start it only once its Mason
+  -- package is installed so the first launch (before the install finishes) stays quiet.
+  local spring_ok, spring_boot = pcall(require, 'spring_boot')
+  local reg_ok, spring_registry = pcall(require, 'mason-registry')
+  if spring_ok and reg_ok and spring_registry.is_installed 'vscode-spring-boot-tools' then
+    spring_boot.setup {}
+  end
 
   for name, server in pairs(servers) do
     vim.lsp.config(name, server)
@@ -789,19 +801,32 @@ do
   vim.pack.add { gh 'stevearc/conform.nvim' }
   require('conform').setup {
     notify_on_error = false,
+    -- Fast native formatters (prettier / ruff / stylua) finish in a few ms, so it is
+    -- fine for them to block the save.
     format_on_save = function(bufnr)
-      -- You can specify filetypes to autoformat on save here:
-      local enabled_filetypes = {
+      local sync_filetypes = {
         lua = true,
         python = true,
         json = true,
         html = true,
         css = true,
         javascript = true,
+      }
+      if sync_filetypes[vim.bo[bufnr].filetype] then
+        return { timeout_ms = 500 }
+      else
+        return nil
+      end
+    end,
+    -- Java has no installed CLI formatter, so conform falls back to jdtls' LSP
+    -- formatting, which is slow. Run it AFTER the write, asynchronously, so `:w`
+    -- returns instantly. Cost: one extra background write when formatting completes.
+    format_after_save = function(bufnr)
+      local async_filetypes = {
         java = true,
       }
-      if enabled_filetypes[vim.bo[bufnr].filetype] then
-        return { timeout_ms = 500 }
+      if async_filetypes[vim.bo[bufnr].filetype] then
+        return {}
       else
         return nil
       end
