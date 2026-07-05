@@ -2,6 +2,15 @@
 -- Mason must have installed: jdtls, java-debug-adapter, java-test, vscode-spring-boot-tools
 -- (see ensure_installed in init.lua). On first open run :Mason if anything is missing.
 
+-- Indentation: 4 spaces (Oracle/Sun Java convention). Set before any early return so
+-- it applies to every Java buffer even when jdtls is unavailable. Manual formatting
+-- (<leader>f via conform) derives insertSpaces/tabSize from these options, so jdtls
+-- also formats with 4 spaces.
+vim.bo.expandtab = true
+vim.bo.shiftwidth = 4
+vim.bo.tabstop = 4
+vim.bo.softtabstop = 4
+
 local ok, jdtls = pcall(require, 'jdtls')
 if not ok then return end
 
@@ -71,6 +80,10 @@ jdtls.start_or_attach {
     java = {
       eclipse = { downloadSources = true },
       maven = { downloadSources = true },
+      -- 2-core VPS: don't auto-recompile the whole project on every change (the biggest
+      -- responsiveness win). Diagnostics no longer refresh live; rebuild on demand with
+      -- <leader>Jb (or :JdtCompile) to update cross-file errors.
+      autobuild = { enabled = false },
       signatureHelp = { enabled = true },
       contentProvider = { preferred = 'fernflower' },
       completion = {
@@ -101,3 +114,5 @@ map('<leader>Jv', function() jdtls.extract_variable() end, 'Extract [v]ariable')
 map('<leader>Jc', function() jdtls.extract_constant() end, 'Extract [c]onstant')
 map('<leader>Jt', function() require('jdtls').test_nearest_method() end, '[T]est nearest method')
 map('<leader>JT', function() require('jdtls').test_class() end, '[T]est class')
+-- autobuild is disabled for responsiveness; trigger a build to refresh diagnostics
+map('<leader>Jb', function() require('jdtls').compile 'incremental' end, '[B]uild project (refresh diagnostics)')

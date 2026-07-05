@@ -778,11 +778,34 @@ do
 
   -- Spring Boot support: a separate Spring Boot language server that auto-attaches to
   -- Java, application.yml and application.properties buffers. Its jdtls extension
-  -- bundles are wired into jdtls in ftplugin/java.lua. Start it only once its Mason
-  -- package is installed so the first launch (before the install finishes) stays quiet.
+  -- bundles are wired into jdtls in ftplugin/java.lua.
+  --
+  -- The LS is a second heavyweight JVM, so on this 2-core VPS we only start it for
+  -- actual Spring projects (build file mentions spring-boot / springframework).
+  -- Detection walks up from the launch directory, so start Neovim inside the project
+  -- you are working on.
+  local function project_is_spring()
+    local build_files = { 'pom.xml', 'build.gradle', 'build.gradle.kts' }
+    local root = vim.fs.root(vim.fn.getcwd(), build_files)
+    if not root then
+      return false
+    end
+    for _, name in ipairs(build_files) do
+      local path = root .. '/' .. name
+      if vim.fn.filereadable(path) == 1 then
+        for _, line in ipairs(vim.fn.readfile(path)) do
+          if line:find('spring-boot', 1, true) or line:find('springframework', 1, true) then
+            return true
+          end
+        end
+      end
+    end
+    return false
+  end
+
   local spring_ok, spring_boot = pcall(require, 'spring_boot')
   local reg_ok, spring_registry = pcall(require, 'mason-registry')
-  if spring_ok and reg_ok and spring_registry.is_installed 'vscode-spring-boot-tools' then
+  if spring_ok and reg_ok and spring_registry.is_installed 'vscode-spring-boot-tools' and project_is_spring() then
     spring_boot.setup {}
   end
 
@@ -818,19 +841,9 @@ do
         return nil
       end
     end,
-    -- Java has no installed CLI formatter, so conform falls back to jdtls' LSP
-    -- formatting, which is slow. Run it AFTER the write, asynchronously, so `:w`
-    -- returns instantly. Cost: one extra background write when formatting completes.
-    format_after_save = function(bufnr)
-      local async_filetypes = {
-        java = true,
-      }
-      if async_filetypes[vim.bo[bufnr].filetype] then
-        return {}
-      else
-        return nil
-      end
-    end,
+    -- Java is intentionally NOT auto-formatted on save: jdtls' LSP formatting is slow
+    -- and the async reformat was distracting. Format on demand with <leader>f, which
+    -- uses the buffer's 4-space setting from ftplugin/java.lua.
     default_format_opts = {
       lsp_format = 'fallback', -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
     },
