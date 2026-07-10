@@ -38,6 +38,17 @@ if not launcher or launcher == '' then
   return
 end
 
+-- Lombok: jdtls must run with lombok.jar as a Java agent, otherwise it cannot see
+-- Lombok-generated members (@Getter/@Setter/@Data/@Builder) and reports phantom
+-- "method getX/setX is undefined" errors even when Maven/javac compile cleanly. The
+-- jar ships inside the Mason jdtls package. Skip (with a warning) if it is missing so
+-- a bad -javaagent path can never stop jdtls from starting.
+local lombok_jar = jdtls_path .. '/lombok.jar'
+if vim.fn.filereadable(lombok_jar) == 0 then
+  vim.notify('Lombok jar not found at ' .. lombok_jar .. ' — Lombok types will show phantom errors', vim.log.levels.WARN)
+  lombok_jar = nil
+end
+
 local root_dir = vim.fs.root(0, { 'gradlew', 'mvnw', 'pom.xml', 'build.gradle', 'build.gradle.kts', '.git' }) or vim.fn.getcwd()
 local project_name = vim.fn.fnamemodify(root_dir, ':p:h:t')
 local workspace_dir = vim.fn.stdpath 'cache' .. '/jdtls/workspace/' .. project_name
@@ -54,27 +65,32 @@ if jtest then vim.list_extend(bundles, vim.fn.glob(jtest .. '/extension/server/*
 local sb_ok, spring_boot = pcall(require, 'spring_boot')
 if sb_ok then vim.list_extend(bundles, spring_boot.java_extensions()) end
 
+local cmd = {
+  'java',
+  '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+  '-Dosgi.bundles.defaultStartLevel=4',
+  '-Declipse.product=org.eclipse.jdt.ls.core.product',
+  '-Dlog.protocol=false', -- was 'true'; logging full LSP JSON traffic per keystroke is costly
+  '-Dlog.level=WARNING', -- was ALL; ALL floods .metadata/.log and drags responsiveness
+  '-Xmx1g',
+  '--add-modules=ALL-SYSTEM',
+  '--add-opens',
+  'java.base/java.util=ALL-UNNAMED',
+  '--add-opens',
+  'java.base/java.lang=ALL-UNNAMED',
+  '-jar',
+  launcher,
+  '-configuration',
+  jdtls_path .. '/' .. config_subdir,
+  '-data',
+  workspace_dir,
+}
+
+-- Insert the Lombok Java agent right after 'java' (index 1) when the jar is present.
+if lombok_jar then table.insert(cmd, 2, '-javaagent:' .. lombok_jar) end
+
 jdtls.start_or_attach {
-  cmd = {
-    'java',
-    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
-    '-Dosgi.bundles.defaultStartLevel=4',
-    '-Declipse.product=org.eclipse.jdt.ls.core.product',
-    '-Dlog.protocol=false', -- was 'true'; logging full LSP JSON traffic per keystroke is costly
-    '-Dlog.level=WARNING', -- was ALL; ALL floods .metadata/.log and drags responsiveness
-    '-Xmx1g',
-    '--add-modules=ALL-SYSTEM',
-    '--add-opens',
-    'java.base/java.util=ALL-UNNAMED',
-    '--add-opens',
-    'java.base/java.lang=ALL-UNNAMED',
-    '-jar',
-    launcher,
-    '-configuration',
-    jdtls_path .. '/' .. config_subdir,
-    '-data',
-    workspace_dir,
-  },
+  cmd = cmd,
   root_dir = root_dir,
   settings = {
     java = {
