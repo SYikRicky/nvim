@@ -699,6 +699,8 @@ do
     tailwindcss = {},
 
     stylua = {},
+    lemminx = {},
+    emmet_language_server = {},
 
     -- Special Lua Config, as recommended by neovim help docs
     lua_ls = {
@@ -764,6 +766,7 @@ do
     'java-debug-adapter', -- DAP server for Java
     'java-test', -- JUnit test runner bundles for jdtls
     'vscode-spring-boot-tools', -- Spring Boot LS + jdtls extension bundles (see ftplugin/java.lua)
+    'lemminx',
     -- Linters used by kickstart.plugins.lint (nvim-lint). These were previously
     -- (ineffectively) listed under mason.setup's ignored `ensure_installed`.
     'ruff', -- python (also used as a formatter by conform)
@@ -772,6 +775,7 @@ do
     'jsonlint', -- json
     'hadolint', -- dockerfile
     'html-lsp', -- HTML language server (install only; enable it by adding `html = {}` to `servers`)
+    'emmet-language-server',
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -787,16 +791,12 @@ do
   local function project_is_spring()
     local build_files = { 'pom.xml', 'build.gradle', 'build.gradle.kts' }
     local root = vim.fs.root(vim.fn.getcwd(), build_files)
-    if not root then
-      return false
-    end
+    if not root then return false end
     for _, name in ipairs(build_files) do
       local path = root .. '/' .. name
       if vim.fn.filereadable(path) == 1 then
         for _, line in ipairs(vim.fn.readfile(path)) do
-          if line:find('spring-boot', 1, true) or line:find('springframework', 1, true) then
-            return true
-          end
+          if line:find('spring-boot', 1, true) or line:find('springframework', 1, true) then return true end
         end
       end
     end
@@ -805,9 +805,7 @@ do
 
   local spring_ok, spring_boot = pcall(require, 'spring_boot')
   local reg_ok, spring_registry = pcall(require, 'mason-registry')
-  if spring_ok and reg_ok and spring_registry.is_installed 'vscode-spring-boot-tools' and project_is_spring() then
-    spring_boot.setup {}
-  end
+  if spring_ok and reg_ok and spring_registry.is_installed 'vscode-spring-boot-tools' and project_is_spring() then spring_boot.setup {} end
 
   for name, server in pairs(servers) do
     vim.lsp.config(name, server)
