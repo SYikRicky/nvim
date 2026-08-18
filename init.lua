@@ -698,6 +698,36 @@ do
     eslint = {},
     tailwindcss = {},
 
+    -- Python: pyright handles types / completion / go-to-definition.
+    -- Linting and formatting stay with `ruff` (nvim-lint + conform).
+    pyright = {
+      before_init = function(_, config)
+        -- Point pyright at the project's virtualenv, otherwise it resolves
+        -- imports against the `python3` on PATH and every third-party import
+        -- shows up as unresolved with no completion.
+        local root = config.root_dir
+        if not root then return end
+
+        local venv_names = { '.venv', 'venv', 'env' }
+        for _, name in ipairs(venv_names) do
+          local interpreter = root .. '/' .. name .. '/bin/python'
+          if vim.uv.fs_stat(interpreter) then
+            config.settings.python.pythonPath = interpreter
+            return
+          end
+        end
+      end,
+      settings = {
+        python = {
+          analysis = {
+            autoSearchPaths = true,
+            useLibraryCodeForTypes = true,
+            diagnosticMode = 'openFilesOnly',
+          },
+        },
+      },
+    },
+
     stylua = {},
     lemminx = {},
     emmet_language_server = {},
@@ -849,7 +879,9 @@ do
     formatters_by_ft = {
       -- rust = { 'rustfmt' },
       -- Conform can also run multiple formatters sequentially
-      python = { 'ruff' },
+      -- NOTE: the bare `ruff` formatter is a deprecated alias for `ruff_fix`
+      -- (i.e. `ruff check --fix`), which lint-fixes but never reformats.
+      python = { 'ruff_organize_imports', 'ruff_format' },
       --
       -- You can use 'stop_after_first' to run the first available formatter from the list
       javascript = { 'prettierd', 'prettier', stop_after_first = true },
@@ -864,7 +896,9 @@ do
       markdown = { 'prettier' },
       java = { 'google-java-format' },
     },
-    formatter = {
+    -- NOTE: the key is `formatters` (plural); as `formatter` it was silently
+    -- ignored, so `--aosp` never reached google-java-format.
+    formatters = {
       ['google-java-format'] = {
         prepend_args = { '--aosp' },
       },
