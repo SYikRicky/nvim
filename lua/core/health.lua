@@ -1,9 +1,4 @@
---[[
---
--- This file is not required for your own configuration,
--- but helps people determine if their system is setup correctly.
---
---]]
+-- `:checkhealth core` -- verifies the external requirements this config assumes.
 
 local check_version = function()
   local verstr = tostring(vim.version())
@@ -35,13 +30,9 @@ end
 
 return {
   check = function()
-    vim.health.start 'kickstart.nvim'
+    vim.health.start 'nvim config'
 
-    vim.health.info [[NOTE: Not every warning is a 'must-fix' in `:checkhealth`
-
-  Fix only warnings for plugins and languages you intend to use.
-    Mason will give warnings for languages that are not installed.
-    You do not need to install, unless you want to use those languages!]]
+    vim.health.info 'Warnings only matter for languages and plugins you actually use; Mason warns about every language it knows.'
 
     local uv = vim.uv or vim.loop
     vim.health.info('System Information: ' .. vim.inspect(uv.os_uname()))

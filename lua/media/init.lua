@@ -1,5 +1,11 @@
+-- Inline images and rendered diagrams in the terminal.
+
+local gh = require('core.pack').gh
+
+-- NOTE: image.nvim is cloned over SSH, so a working GitHub SSH key is required.
 vim.pack.add {
-  { src = 'git@github.com:3rd/image.nvim' },
+  'git@github.com:3rd/image.nvim',
+  gh '3rd/diagram.nvim',
 }
 
 require('image').setup {
@@ -12,8 +18,8 @@ require('image').setup {
       download_remote_images = true,
       only_render_image_at_cursor = false,
       only_render_image_at_cursor_mode = 'popup', -- or "inline"
-      floating_windows = false, -- if true, images will be rendered in floating markdown windows
-      filetypes = { 'markdown', 'vimwiki' }, -- markdown extensions (ie. quarto) can go here
+      floating_windows = false,
+      filetypes = { 'markdown', 'vimwiki' }, -- markdown dialects (e.g. quarto) go here
     },
     asciidoc = {
       enabled = true,
@@ -47,10 +53,35 @@ require('image').setup {
   max_width_window_percentage = nil,
   max_height_window_percentage = 50,
   scale_factor = 1.0,
-  kitty_direct_chunk_size = 4096, -- chunk size for direct Kitty graphics protocol transmission
-  window_overlap_clear_enabled = false, -- toggles images when windows are overlapped
+  kitty_direct_chunk_size = 4096,
+  window_overlap_clear_enabled = false,
   window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', 'snacks_notif', 'scrollview', 'scrollview_sign' },
-  editor_only_render_when_focused = false, -- auto show/hide images when the editor gains/looses focus
-  tmux_show_only_in_active_window = false, -- auto show/hide images in the correct Tmux window (needs visual-activity off)
-  hijack_file_patterns = { '*.png', '*.jpg', '*.jpeg', '*.gif', '*.webp', '*.avif' }, -- render image files as images when opened
+  editor_only_render_when_focused = false,
+  tmux_show_only_in_active_window = false, -- needs visual-activity off
+  hijack_file_patterns = { '*.png', '*.jpg', '*.jpeg', '*.gif', '*.webp', '*.avif' },
+}
+
+require('diagram').setup {
+  integrations = {
+    require 'diagram.integrations.markdown',
+    require 'diagram.integrations.neorg',
+  },
+  renderer_options = {
+    mermaid = {
+      -- mermaid-cli launches headless Chrome, which needs --no-sandbox here.
+      cli_args = { '-p', vim.fn.stdpath 'config' .. '/puppeteer-config.json' },
+      theme = 'forest',
+    },
+    plantuml = {
+      charset = 'utf-8',
+    },
+    d2 = {
+      cli_args = { '--pad', '0' },
+      theme_id = 1,
+    },
+    gnuplot = {
+      theme = 'dark',
+      size = '800,600',
+    },
+  },
 }

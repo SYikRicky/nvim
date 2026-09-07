@@ -124,9 +124,9 @@ jdtls.start_or_attach {
   },
   init_options = { bundles = bundles },
   on_attach = function()
-    -- The DAP stack is lazy-loaded (see kickstart.plugins.debug); make sure it
+    -- The DAP stack is lazy-loaded (see lua/debugger); make sure it
     -- is installed and set up before wiring Java debugging/test integration.
-    require('kickstart.plugins.debug').ensure_loaded()
+    require('debugger').ensure_loaded()
     jdtls.setup_dap { hotcodereplace = 'auto' }
     pcall(function() require('jdtls.dap').setup_dap_main_class_configs() end)
   end,

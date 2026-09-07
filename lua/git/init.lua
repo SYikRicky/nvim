@@ -1,13 +1,12 @@
--- Adds git related signs to the gutter, as well as utilities for managing changes
--- NOTE: gitsigns is already included in init.lua but contains only the base
--- config. This will add also the recommended keymaps.
+-- Git integration: gutter signs plus hunk actions, and a full diff/history view.
 
-vim.pack.add { 'https://github.com/lewis6991/gitsigns.nvim' }
+local gh = require('core.pack').gh
 
+vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
+
+-- NOTE: one `setup` call only. Each call restarts from defaults, so a second
+-- one elsewhere would silently drop the signs and keymaps configured here.
 require('gitsigns').setup {
-  -- NOTE: Consolidated single setup. The custom signs previously lived in a
-  -- second `gitsigns.setup` call in init.lua, which this one overrode (each
-  -- setup() restarts from defaults), so the signs are kept here instead.
   signs = {
     add = { text = '+' }, ---@diagnostic disable-line: missing-fields
     change = { text = '~' }, ---@diagnostic disable-line: missing-fields
@@ -24,7 +23,7 @@ require('gitsigns').setup {
       vim.keymap.set(mode, l, r, opts)
     end
 
-    -- Navigation
+    -- Navigation. Inside a diff, fall through to the built-in ]c / [c.
     map('n', ']c', function()
       if vim.wo.diff then
         vim.cmd.normal { ']c', bang = true }
@@ -41,11 +40,10 @@ require('gitsigns').setup {
       end
     end, { desc = 'Jump to previous git [c]hange' })
 
-    -- Actions
-    -- visual mode
+    -- Actions on the visual selection
     map('v', '<leader>hs', function() gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'git [s]tage hunk' })
     map('v', '<leader>hr', function() gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'git [r]eset hunk' })
-    -- normal mode
+    -- Actions on the hunk under the cursor
     map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
     map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
     map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
@@ -65,3 +63,6 @@ require('gitsigns').setup {
     map({ 'o', 'x' }, 'ih', gitsigns.select_hunk)
   end,
 }
+
+vim.pack.add { gh 'sindrets/diffview.nvim' }
+require('diffview').setup {}

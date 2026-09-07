@@ -1,0 +1,12 @@
+-- Clear search highlights.
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+-- Easier to discover than the built-in <C-\><C-n>. Note this does not work in
+-- every terminal emulator / tmux setup.
+vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+
+-- Window navigation. See `:help wincmd`.
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })

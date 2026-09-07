@@ -1,8 +1,10 @@
--- nvim-html-css: CSS class-name completion (and hover/peek) inside HTML buffers.
+-- CSS class-name completion (plus hover and peek) inside HTML buffers.
 --
--- NOTE: setup() parses the remote `style_sheets` below (Bootstrap + Bulma from a
--- CDN), which costs ~16ms at startup. Since it is only useful in HTML buffers,
--- it is lazy-loaded on the first `FileType html` instead of at startup.
+-- NOTE: setup() parses the remote `style_sheets` below (Bootstrap + Bulma from
+-- a CDN), which costs ~16ms at startup. Since it is only useful in HTML
+-- buffers, it is lazy-loaded on the first `FileType html`.
+
+local gh = require('core.pack').gh
 
 local loaded = false
 
@@ -10,13 +12,10 @@ local function load_html_css(args)
   if loaded then return end
   loaded = true
 
-  vim.pack.add {
-    { src = 'https://github.com/jezda1337/nvim-html-css' },
-  }
+  vim.pack.add { gh 'jezda1337/nvim-html-css' }
 
   require('html-css').setup {
     enable_on = { 'html' },
-    -- if you want custom opt for handlers
     handlers = {
       definition = {
         bind = 'gd',
@@ -46,10 +45,10 @@ local function load_html_css(args)
     },
   }
 
-  -- The buffer that triggered this lazy load already fired its own FileType
-  -- event before html-css registered its autocmds, so re-emit it for that
-  -- buffer to make the plugin attach right away (the `loaded` guard prevents
-  -- this loader from running a second time).
+  -- The buffer that triggered this load already fired its own FileType event
+  -- before html-css registered its autocmds, so re-emit it for that buffer to
+  -- make the plugin attach right away. The `loaded` guard keeps this loader
+  -- from running a second time.
   vim.api.nvim_exec_autocmds('FileType', { buffer = args.buf })
 end
 
